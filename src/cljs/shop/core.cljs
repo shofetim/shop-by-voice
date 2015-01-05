@@ -15,9 +15,12 @@
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Utils
 
+(def audio false)
 
-(defn speak [msg]
-  (.speak js/speechSynthesis (new js/SpeechSynthesisUtterance msg)))
+(defn ^:export say [msg]
+  (if audio
+    (.speak js/speechSynthesis (new js/SpeechSynthesisUtterance msg))
+    (.log js/console msg)))
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Wit.ai
@@ -61,7 +64,8 @@
 (def api-token "X45BKBNG6KKPYUVAWGYQZ3YG2VE3GHZF")
 
 (defn main []
-  (.connect mic api-token)
+  ;; (def mic (new-mic))
+  ;; (.connect mic api-token)
   (om/root
     (fn [app owner]
       (reify
