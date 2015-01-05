@@ -61,6 +61,15 @@
      :query-params {"v" gensym, "q" msg}}))
 
 ;; ──────────────────────────────────────────────────────────────────────
+;; Relay Foods
+
+(defn ^:export seach [q]
+  (http/post "https://api.relayfoods.com/api/ecommerce/v1/DCX/search/"
+    {:form-params {"Query" (str "query:" q), "Page" 1
+                    "PageSize" 20, "RefinementSize" 5
+                    "Sort" 2, "Heavy" false}}))
+
+;; ──────────────────────────────────────────────────────────────────────
 ;; state
 
 (defonce state
