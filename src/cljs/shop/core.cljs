@@ -15,10 +15,11 @@
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Utils
 
-(def audio false)
+(def *audio* false)
+(def *api-token* "X45BKBNG6KKPYUVAWGYQZ3YG2VE3GHZF")
 
 (defn ^:export say [msg]
-  (if audio
+  (if *audio*
     (.speak js/speechSynthesis (new js/SpeechSynthesisUtterance msg))
     (.log js/console msg)))
 
@@ -53,24 +54,37 @@
 
 (defonce state
   (atom {:cart {}
-         :text "Hello Chestnut!"
+         :view :main
          }))
-
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Main
 
+(defn handle-input [data owner]
+  (let [node (om/get-node owner "query")]
+    (.log js/console (.-value node))
+    (set! (.-value node) "")))
+
+(defcomponent input [data owner]
+  (render [_]
+    (i/input {:type "text" :ref "query"
+              :auto-focus true
+              :placeholder "Hello, what can I help you find today?"
+              :bs-style "primary"
+              :on-key-down #(when (= (.-key %) "Enter")
+                              (handle-input data owner))})))
+
+
 (def intro "Hello, what can I help you find today?")
-(def api-token "X45BKBNG6KKPYUVAWGYQZ3YG2VE3GHZF")
+
+
+(defcomponent app [data owner]
+  (render [_]
+    (dom/div {:class "container-fluid"}
+      (case (:view data)
+        :main (om/build input data)))))
 
 (defn main []
   ;; (def mic (new-mic))
-  ;; (.connect mic api-token)
-  (om/root
-    (fn [app owner]
-      (reify
-        om/IRender
-        (render [_]
-          (dom/h1 nil (:text app)))))
-    state
-    {:target (. js/document (getElementById "app"))}))
+  ;; (.connect mic *api-token*)
+  (om/root app state {:target (. js/document (getElementById "app"))}))
