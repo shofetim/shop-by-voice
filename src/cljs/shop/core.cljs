@@ -8,7 +8,8 @@
             [om-bootstrap.input :as i]
             [om-bootstrap.random :as r]
             [cljs.core.async :refer [close! put! take! chan <! >!]]
-            [cljs-http.client :as http]))
+            [cljs-http.client :as http]
+            [shop.secret :refer [*secret*]]))
 
 (enable-console-print!)
 
@@ -49,6 +50,16 @@
     (set! (.-onresult m) (fn [intent, entities] (info intent) (info entities)))
     m))
 
+;; Cross domain, simple text interaction with Wit.ai, to get this to
+;; work run chrome with `google-chrome --disable-web-security`
+
+(defn wit-send [msg]
+  (http/get "https://api.wit.ai/message"
+    ;;The other token is tied to a domain, this one isn't so keep it
+    ;;out of git's history
+    {:headers {"Authorization" (str "Bearer " *secret*)}
+     :query-params {"v" gensym, "q" msg}}))
+
 ;; ──────────────────────────────────────────────────────────────────────
 ;; state
 
@@ -61,8 +72,11 @@
 ;; Main
 
 (defn handle-input [data owner]
-  (let [node (om/get-node owner "query")]
-    (.log js/console (.-value node))
+  (let [node (om/get-node owner "query")
+        query (.-value node)]
+    (go (let [response (<! (wit-send query))]
+          (prn (:status response))
+          (prn (:body response))))
     (set! (.-value node) "")))
 
 (defcomponent input [data owner]
