@@ -35,18 +35,15 @@
     (str k "=" v "\n")))
 
 (defn new-mic []
-  (let [m (.Microphone (new js/Wit)
-            (.getElementById js/document "microphone"))])
-  (set! m.onready (fn [] (info "Microphone is ready to record")))
-  (set! m.onaudiostart (fn [] (info "Recording started")))
-  (set! m.onaudioend (fn [] (info "Recording stopped, processing started")))
-  (set! m.onerror (fn [err] (error err)))
-  (set! m.onconnecting (fn [] (info "Microphone is connecting")))
-  (set! m.ondisconnected (fn [] (info "Microphone is not connected")))
-  (set! m.onresult (fn [intent, entities] (info intent) (info entities)))
-  m)
-
-(def mic (new-mic))
+  (let [m (new js/Wit.Microphone (.getElementById js/document "microphone"))]
+    (set! (.-onready m) (fn [] (info "Microphone is ready to record")))
+    (set! (.-onaudiostart m) (fn [] (info "Recording started")))
+    (set! (.-onaudioend m) (fn [] (info "Recording stopped, processing started")))
+    (set! (.-onerror m) (fn [err] (error err)))
+    (set! (.-onconnecting m) (fn [] (info "Microphone is connecting")))
+    (set! (.-ondisconnected m) (fn [] (info "Microphone is not connected")))
+    (set! (.-onresult m) (fn [intent, entities] (info intent) (info entities)))
+    m))
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; state
