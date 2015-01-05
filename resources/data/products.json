@@ -1,0 +1,202 @@
+[
+  {
+    "price": 0.25,
+    "unit": "ea",
+    "out-of-stock": false,
+    "vendor": "Class Produce",
+    "brand": "Relay Produce",
+    "hearts": 1595,
+    "name": "Bananas",
+    "product-id": "43fa22b7-d7e9-4cad-a22b-2fa6196dba84"
+  },
+  {
+    "price": 3,
+    "unit": "egg",
+    "out-of-stock": false,
+    "vendor": "Trickling Springs Creamery",
+    "brand": "Nature's Yoke",
+    "hearts": 449,
+    "name": "Large Natural Cage-Free Brown Eggs",
+    "product-id": "00a85279-bcb7-47d9-9d9f-9e2535f84135"
+  },
+  {
+    "price": 0.35,
+    "unit": "ea",
+    "out-of-stock": false,
+    "vendor": "Class Produce",
+    "brand": "Relay Organic Produce",
+    "hearts": 957,
+    "name": "Organic Bananas",
+    "product-id": "71d4ed37-7d78-41ac-9b84-ec8e3920690b"
+  },
+  {
+    "price": 6.5,
+    "unit": "lb",
+    "out-of-stock": false,
+    "vendor": "The Chef's Warehouse",
+    "brand": "Freebird",
+    "hearts": 1115,
+    "name": "Boneless Skinless Chicken Breast",
+    "product-id": "61d4d93d-a471-4f10-bb33-ed477bcf75af"
+  },
+  {
+    "price": 0.75,
+    "unit": "ea",
+    "out-of-stock": false,
+    "vendor": "Albert's Organics",
+    "brand": "Relay Organic Produce",
+    "hearts": 474,
+    "name": "Organic Yellow Onions",
+    "product-id": "bf2ab3b3-968f-4350-8d32-54e03ae8d954"
+  },
+  {
+    "price": 4.5,
+    "unit": "egg",
+    "out-of-stock": false,
+    "vendor": "Trickling Springs Creamery",
+    "brand": "Nature's Yoke",
+    "hearts": 551,
+    "name": "Cage Free, Veggie Fed, Organic Brown Eggs",
+    "product-id": "d7c762bc-5607-4d89-8337-01f33e34a2df"
+  },
+  {
+    "price": 1.5,
+    "unit": "ea",
+    "out-of-stock": false,
+    "vendor": "Class Produce",
+    "brand": "Relay Produce",
+    "hearts": 757,
+    "name": "Avocados",
+    "product-id": "ee451b2c-ea91-4fca-b4ea-3f961aa82d84"
+  },
+  {
+    "price": 4.5,
+    "unit": "oz",
+    "out-of-stock": false,
+    "vendor": "Albert's Organics",
+    "brand": "Relay Organic Produce",
+    "hearts": 500,
+    "name": "Organic Baby Spinach",
+    "product-id": "427cb4c7-b153-4e98-9114-83f521f39605"
+  },
+  {
+    "price": 2.25,
+    "unit": "lb",
+    "out-of-stock": false,
+    "vendor": "Albert's Organics",
+    "brand": "Relay Organic Produce",
+    "hearts": 753,
+    "name": "Organic Baby Carrots",
+    "product-id": "2021f105-8147-4596-9f04-c35ddee422ec"
+  },
+  {
+    "price": 2,
+    "unit": "ea",
+    "out-of-stock": false,
+    "vendor": "Albert's Organics",
+    "brand": "Relay Organic Produce",
+    "hearts": 532,
+    "name": "Organic Avocados",
+    "product-id": "4ac0fb58-2043-43d3-9808-276523a6dfa2"
+  },
+  {
+    "price": 0.5,
+    "unit": "ea",
+    "out-of-stock": false,
+    "vendor": "Class Produce",
+    "brand": "Relay Produce",
+    "hearts": 411,
+    "name": "Yellow Onions",
+    "product-id": "2cfb167c-dadb-4bdb-8d92-6e1b3e192672"
+  },
+  {
+    "price": 4.5,
+    "unit": "lb",
+    "out-of-stock": false,
+    "vendor": "US Foods, Meats ",
+    "brand": "Metro Deli",
+    "hearts": 343,
+    "name": "Natural Smoked Turkey, Sliced",
+    "product-id": "b33e8e68-0336-49b6-8725-ff55111c9714"
+  },
+  {
+    "price": 4.5,
+    "unit": "half gallon",
+    "out-of-stock": false,
+    "vendor": "Trickling Springs Creamery",
+    "brand": "Trickling Springs Creamery",
+    "hearts": 272,
+    "name": "Organic Milk, 2%",
+    "product-id": "3f302cd0-3e2b-412d-b077-6f47032e01db"
+  },
+  {
+    "price": 5,
+    "unit": "oz",
+    "out-of-stock": false,
+    "vendor": "BreadWorks Bakery",
+    "brand": "BreadWorks Bakery ",
+    "hearts": 112,
+    "name": "Sunflower Wheat Bread",
+    "product-id": "854473eb-242f-4e6c-9ac1-ab5fd1031f3c"
+  },
+  {
+    "price": 3.5,
+    "unit": "lb",
+    "out-of-stock": false,
+    "vendor": "Class Produce",
+    "brand": "Relay Produce",
+    "hearts": 451,
+    "name": "Brussels Sprouts",
+    "product-id": "b3b4cfb1-cbab-48e4-a991-1dd5dfa2a166"
+  },
+  {
+    "price": 0.5,
+    "unit": "ea",
+    "out-of-stock": false,
+    "vendor": "Class Produce",
+    "brand": "Relay Produce",
+    "hearts": 564,
+    "name": "Lemon",
+    "product-id": "b5819a1c-f9ef-48bf-848a-71acd4d7eb4c"
+  },
+  {
+    "price": 3,
+    "unit": "ea",
+    "out-of-stock": false,
+    "vendor": "Albert's Organics",
+    "brand": "Relay Organic Produce",
+    "hearts": 387,
+    "name": "Organic Kale",
+    "product-id": "01230eb7-f077-4411-bdcf-b76e3994740e"
+  },
+  {
+    "price": 1.5,
+    "unit": "ea",
+    "out-of-stock": false,
+    "vendor": "Albert's Organics",
+    "brand": "Relay Organic Produce",
+    "hearts": 576,
+    "name": "Organic Sweet Potatoes",
+    "product-id": "39ac351c-033b-4c3f-82f0-332cba202548"
+  },
+  {
+    "price": 3,
+    "unit": "ea",
+    "out-of-stock": false,
+    "vendor": "Baywater Greens",
+    "brand": "Baywater Greens",
+    "hearts": 70,
+    "name": "Spring Mix",
+    "product-id": "46a486ab-5b72-40ad-a7a6-6bd0abf576e1"
+  },
+  {
+    "price": 0.5,
+    "unit": "ea",
+    "out-of-stock": false,
+    "vendor": "Albert's Organics",
+    "brand": "Relay Organic Produce",
+    "hearts": 51,
+    "name": "Organic Lime",
+    "product-id": "d20d5fa8-69b6-4aea-8447-3f9180403133"
+  }
+]

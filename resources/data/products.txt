@@ -1,0 +1,240 @@
+eggs
+milk
+meat share
+butter
+bread
+cheese
+chicken
+onion
+kale
+spinach
+apples
+carrots
+yogurt
+bacon
+sausage
+garlic
+broccoli
+ham
+bananas
+ice cream
+coffee
+hummus
+pasta
+avocado
+turkey
+cauliflower
+tomato
+celery
+peanut butter
+cilantro
+potatoes
+mushrooms
+citrus
+tomatoes
+cucumber
+lemon
+honey
+soup
+salsa
+crackers
+chocolate
+almond milk
+banana
+lettuce
+ground beef
+sale
+rice
+cream cheese
+green beans
+cereal
+ginger
+apple
+parsley
+sour cream
+sweet potato
+olive oil
+sugar
+favorites
+granola
+christmas meat
+tofu
+salmon
+egg nog
+bees knees
+juice
+orange juice
+chips
+almonds
+flour
+coconut milk
+pepper
+basil
+black beans
+tortilla
+cream
+cabbage
+lime
+cheddar
+grapes
+half and half
+salad
+tea
+bee's knees
+beans
+gearhart
+oranges
+olives
+potato
+quinoa
+blueberries
+oatmeal
+shrimp
+popcorn
+tomato sauce
+onions
+orange
+parmesan
+strawberries
+tortillas
+red onion
+brussel sprouts
+pineapple
+wine
+bagels
+mushroom
+lamb
+pasta sauce
+producer=K3
+corn
+pizza
+pork
+zucchini
+goat cheese
+greek yogurt
+mozzarella
+beef
+pizza dough
+tortilla chips
+beets
+virginia chutney
+produce guide
+eggnog
+fruit
+cookies
+sweet potatoes
+toilet paper
+asparagus
+chicken broth
+peppers
+squash
+thyme
+apple cider
+beer
+cider
+feta
+butternut squash
+ground turkey
+fish
+heavy cream
+red pepper
+maple syrup
+clementines
+walnuts
+almond butter
+kombucha
+pecans
+rosemary
+marinated meats
+tomato paste
+bell pepper
+carrot
+frozen burritos
+jalapeno
+chocolate chips
+peas
+tuna
+ceremony coffee
+pears
+pear
+chicken breast
+cranberries
+brown sugar
+coconut
+coconut oil
+mustard
+nuts
+soap
+salt
+raisins
+cheddar cheese
+kefir
+pumpkin
+oats
+guacamole
+pesto
+pomegranate
+shrimp wild caught
+cinnamon
+diced tomatoes
+water
+applesauce
+broth
+lemons
+pita
+pretzels
+bagel
+green pepper
+paper towels
+shredded cheese
+chorizo
+duck
+rolls
+egg
+grapefruit
+jam
+vinegar
+ketchup
+lentils
+sage
+vegetable broth
+mango
+avacado
+scallions
+shallots
+steak
+arugula
+chicken stock
+gelato
+greens
+pettijohn's orchard
+brie
+buttermilk
+chop chop
+dates
+fennel
+sauce
+chickpeas
+hot chocolate
+meat
+salad dressing
+salami
+brown rice
+farm friend egg nog
+mayo
+peanuts
+berries
+cumin
+pizza sauce
+ricotta
+pickles
+roast beef
+spaghetti
+spaghetti squash
+green onions
+mint
+cashews
+mason dixie
+romaine
+canned tomatoes
+leeks
