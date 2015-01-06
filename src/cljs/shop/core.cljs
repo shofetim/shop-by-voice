@@ -16,13 +16,36 @@
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Utils
 
-(def *audio* false)
+(def *audio* true)
 (def *api-token* "X45BKBNG6KKPYUVAWGYQZ3YG2VE3GHZF")
+
+(def intro "Hello, what can I help you find today?")
+
+(def dead-space-fillers
+  ["Humm, let me see..."
+   "Ok, one second."
+   "I'm not sure, let me check."
+   "Let me see what we have in stock"
+   "Checking, I'll be right back with you."
+   "I think we do, I'll check."])
+
+(def second-chance
+  ["I'm sorry, I couldn't understand you, you could repeat that?"
+   "Humm, I'm having trouble understanding you. Could you repeat that?"
+   "Sorry, I didn't catch that, please try again."
+   "I'm sorry, I couldn't understand you, you could you say it in another way?"
+   ])
 
 (defn ^:export say [msg]
   (if *audio*
     (.speak js/speechSynthesis (new js/SpeechSynthesisUtterance msg))
     (.log js/console msg)))
+
+(defn ^:export fill-space []
+  (say (rand-nth dead-space-fillers)))
+
+(defn ^:export second-chance []
+  (say (rand-nth second-chance)))
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Wit.ai
@@ -52,7 +75,6 @@
 
 ;; Cross domain, simple text interaction with Wit.ai, to get this to
 ;; work run chrome with `google-chrome --disable-web-security`
-
 (defn wit-send [msg]
   (http/get "https://api.wit.ai/message"
     ;;The other token is tied to a domain, this one isn't so keep it
@@ -85,9 +107,8 @@
 ;; state
 
 (defonce state
-  (atom {:cart {}
-         :view :main
-         }))
+  (atom {:cart []
+         :available-products []}))
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Main
@@ -133,8 +154,6 @@
     (dom/div {:class "col-xs-3 pull-right cart"}
       (dom/h2 "Cart")
       (list-items (:cart data)))))
-
-(def intro "Hello, what can I help you find today?")
 
 (defcomponent app [data owner]
   (render [_]
