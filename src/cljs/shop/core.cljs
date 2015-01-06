@@ -147,6 +147,18 @@
                (dom/span {:class "price"} (->> % :Variants first :price)))
          items))))
 
+(defn list-items2 [items]
+  (dom/div
+    (map #(dom/div {:class "flip-container"}
+            (dom/div {:class "flipper"}
+              (dom/div {:class "front"}
+                (dom/img  {:src (image (get-in % [:Image :Filename]))}))
+              (dom/div {:class "back"}
+                (dom/span {:class "brand"} (get-in % [:Brand :Name]))
+                (dom/span {:class "name"} (get-in % [:Name]))
+                (dom/span {:class "price"} (->> % :Variants first :Price)))))
+      items)))
+
 (defcomponent available-products [data owner]
   (render [_]
     (dom/div {:class "col-xs-9 available-products"}

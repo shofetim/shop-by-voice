@@ -80,7 +80,27 @@ h2 {
  Available products
  *************************************************/
 
-.available-products li.list-group-item {
+.available-products span.brand {
+  display: block;
+  color: grey;
+  font-size: 17px;
+  margin-top: 5px;
+}
+
+.available-products span.name {
+  margin-top: 15px;
+  display: block;
+  color: #e35755;
+  font-size: 17px;
+  font-weight: 600;
+}
+
+.available-products span.price {
+  display: block;
+}
+
+.available-products .flip-container {
+  perspective: 1000;
   border: 1px solid grey;
   border-radius: 5px;
   padding: 0px;
@@ -92,21 +112,29 @@ h2 {
   margin: 3px;
 }
 
-.available-products li.list-group-item span.brand {
-  display: block;
-  color: grey;
-  font-size: 17px;
-  margin-top: 5px;
+.available-products .flip-container:hover .flipper,
+.available-products .flip-container.hover .flipper {
+  transform: rotateY(180deg);
 }
 
-.available-products li.list-group-item span.name {
-  margin-top: 15px;
-  display: block;
-  color: #e35755;
-  font-size: 17px;
-  font-weight: 600;
+.available-products .flipper {
+  transition: 0.6s;
+  transform-style: preserve-3d;
+  position: relative;
 }
 
-.available-products li.list-group-item span.price {
-  display: block;
+.available-products .front,
+.available-products .back {
+  backface-visibility: hidden;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.available-products .front {
+  z-index: 2;
+}
+
+.available-products .back {
+  transform: rotateY(180deg);
 }
