@@ -142,17 +142,22 @@
 
 (defn interactively-refine-search [q]
   (go
-    (let [products (get-in (<! (search q)) [:body :Items])]
-      (swap! state assoc :Items products)
-      (say
-        (str
-          "We do have several products like that. "
-          "Could I interest you in "
-          (:Name (first products))
-          " or "
-          (:Name (second products))
-          " or perhaps maybe "
-          (:Name (nth products 2)))))))
+    (let [response (<! (search q))
+          status (:status response)
+          products (get-in response [:body :Items])]
+      (if (= status 200)
+        (do
+          (swap! state assoc :Items products)
+          (say
+            (str
+              "We do have several products like that. "
+              "Could I interest you in "
+              (:Name (first products))
+              " or "
+              (:Name (second products))
+              " or perhaps maybe "
+              (:Name (nth products 2)))))
+        (say "I'm sorry, I've having trouble searching for that. Please try again")))))
 
 (defn interact [response]
   (let [outcomes (get-in response [:body :outcomes])
@@ -163,11 +168,12 @@
     (fill-space)
     (if (< confidence 0.27)
       (ask-again)
+      ;;fallback to other entity?
       (case intent-of
         "add_to_cart" (add-to-cart
                         (->> entities :product first :value))
         "search" (interactively-refine-search
-                   (->> entities :product first :value))))))
+                   (->> entities :local_search_query first :value))))))
 
 (defn handle-input [data owner]
   (let [node (om/get-node owner "query")
