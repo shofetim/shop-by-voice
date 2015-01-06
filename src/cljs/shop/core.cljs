@@ -63,11 +63,23 @@
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Relay Foods
 
-(defn ^:export seach [q]
-  (http/post "https://api.relayfoods.com/api/ecommerce/v1/DCX/search/"
-    {:form-params {"Query" (str "query:" q), "Page" 1
-                    "PageSize" 20, "RefinementSize" 5
-                    "Sort" 2, "Heavy" false}}))
+;; (defn ^:export search [q]
+;;   (http/post "https://api.relayfoods.com/api/ecommerce/v1/DCX/search/"
+;;     {:form-params {"Query" (str "query:" q), "Page" 1
+;;                     "PageSize" 20, "RefinementSize" 5
+;;                     "Sort" 2, "Heavy" false}}))
+
+;; One ugly mock
+(defn ^:export search [q]
+  (go (js->clj
+        (.parse js/JSON
+          (:body
+           (<!
+             (http/post "http://localhost:8000/search"
+               {:form-params {"Query" (str "query:" "eggs"), "Page" 1
+                              "PageSize" 20, "RefinementSize" 5
+                              "Sort" 2, "Heavy" false}}))))
+        :keywordize-keys true)))
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; state
@@ -97,17 +109,49 @@
               :on-key-down #(when (= (.-key %) "Enter")
                               (handle-input data owner))})))
 
+(defn image [name]
+  (str "https://res.cloudinary.com/relay-foods/image/upload/"
+    "q_40,h_300,w_400,c_fill/" name ".JPG"))
+
+(defn list-items [items]
+  (dom/ul {:class "list-group"}
+    (map #(dom/li {:class "list-group-item "}
+            (dom/img  {:src (image (get-in % [:Image :Filename]))})
+            (dom/span {:class "brand"} (get-in % [:Brand :Name]))
+            (dom/span {:class "name"} (get-in % [:Name]))
+            (dom/span {:class "price"} (->> % :Variants first :price)))
+      items)))
+
+(defcomponent available-products [data owner]
+  (render [_]
+    (dom/div {:class "col-xs-9 available-products"}
+      (dom/h2 "Available Products")
+      (list-items (:Items data)))))
+
+(defcomponent cart [data owner]
+  (render [_]
+    (dom/div {:class "col-xs-3 pull-right cart"}
+      (dom/h2 "Cart")
+      (list-items (:cart data)))))
 
 (def intro "Hello, what can I help you find today?")
-
 
 (defcomponent app [data owner]
   (render [_]
     (dom/div {:class "container-fluid"}
-      (case (:view data)
-        :main (om/build input data)))))
+      (dom/div {:class "row"}
+        (dom/div {:class "col-xs-offset-3 col-xs-6 focus"}
+          (om/build input data)))
+      (om/build cart data)
+      (dom/div {:class "row"}
+        (om/build available-products data)))))
+
+(defn ^:export dump []
+  (.log js/console (clj->js @state)))
 
 (defn main []
   ;; (def mic (new-mic))
   ;; (.connect mic *api-token*)
+  (go (swap! state assoc :Items (:Items (<! (search "eggs")))))
+  (go (swap! state assoc :cart (:Items (<! (search "eggs")))))
   (om/root app state {:target (. js/document (getElementById "app"))}))
