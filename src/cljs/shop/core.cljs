@@ -136,6 +136,10 @@
      (str "https://res.cloudinary.com/relay-foods/image/upload/"
        "q_40,h_" h ",w_" w ",c_fill/" name ".JPG")))
 
+
+(defn format-price [n]
+  (str "$" (.toFixed (/ (Math.round (* n 100)) 100) 2)))
+
 (defcomponent available-products [data owner]
   (render [_]
     (dom/div {:class "col-xs-9 available-products"}
@@ -148,7 +152,7 @@
                   (dom/div {:class "back"}
                     (dom/span {:class "brand"} (get-in % [:Brand :Name]))
                     (dom/span {:class "name"} (get-in % [:Name]))
-                    (dom/span {:class "price"} (->> % :Variants first :Price)))))
+                    (dom/span {:class "price"} (format-price (->> % :Variants first :Price))))))
           (:Items data))))))
 
 (defcomponent cart [data owner]

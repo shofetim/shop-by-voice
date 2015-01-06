@@ -97,6 +97,9 @@ h2 {
 
 .available-products span.price {
   display: block;
+  margin-top: 20px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .available-products .flip-container {
