@@ -136,40 +136,31 @@
      (str "https://res.cloudinary.com/relay-foods/image/upload/"
        "q_40,h_" h ",w_" w ",c_fill/" name ".JPG")))
 
-(defn list-items
-  ([items] (list-items items 150 200))
-  ([items w h]
-     (dom/ul {:class "list-group"}
-       (map #(dom/li {:class "list-group-item "}
-               (dom/img  {:src (image (get-in % [:Image :Filename]) w h)})
-               (dom/span {:class "brand"} (get-in % [:Brand :Name]))
-               (dom/span {:class "name"} (get-in % [:Name]))
-               (dom/span {:class "price"} (->> % :Variants first :price)))
-         items))))
-
-(defn list-items2 [items]
-  (dom/div
-    (map #(dom/div {:class "flip-container"}
-            (dom/div {:class "flipper"}
-              (dom/div {:class "front"}
-                (dom/img  {:src (image (get-in % [:Image :Filename]))}))
-              (dom/div {:class "back"}
-                (dom/span {:class "brand"} (get-in % [:Brand :Name]))
-                (dom/span {:class "name"} (get-in % [:Name]))
-                (dom/span {:class "price"} (->> % :Variants first :Price)))))
-      items)))
-
 (defcomponent available-products [data owner]
   (render [_]
     (dom/div {:class "col-xs-9 available-products"}
       (dom/h2 "Available Products")
-      (list-items (:Items data)))))
+      (dom/div
+        (map #(dom/div {:class "flip-container"}
+                (dom/div {:class "flipper"}
+                  (dom/div {:class "front"}
+                    (dom/img  {:src (image (get-in % [:Image :Filename]))}))
+                  (dom/div {:class "back"}
+                    (dom/span {:class "brand"} (get-in % [:Brand :Name]))
+                    (dom/span {:class "name"} (get-in % [:Name]))
+                    (dom/span {:class "price"} (->> % :Variants first :Price)))))
+          (:Items data))))))
 
 (defcomponent cart [data owner]
   (render [_]
     (dom/div {:class "col-xs-3 pull-right cart"}
       (dom/h2 "Cart")
-      (list-items (:cart data) 67 53))))
+      (dom/ul {:class "list-group"}
+        (map #(dom/li {:class "list-group-item "}
+                (dom/img  {:src (image (get-in % [:Image :Filename]) 67 53)})
+                (dom/span {:class "brand"} (get-in % [:Brand :Name]))
+                (dom/span {:class "name"} (get-in % [:Name])))
+          (:cart data))))))
 
 (defcomponent app [data owner]
   (render [_]
