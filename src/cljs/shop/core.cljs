@@ -130,18 +130,22 @@
               :on-key-down #(when (= (.-key %) "Enter")
                               (handle-input data owner))})))
 
-(defn image [name]
-  (str "https://res.cloudinary.com/relay-foods/image/upload/"
-    "q_40,h_300,w_400,c_fill/" name ".JPG"))
+(defn image
+  ([name] (image name 150 200))
+  ([name w h]
+     (str "https://res.cloudinary.com/relay-foods/image/upload/"
+       "q_40,h_" h ",w_" w ",c_fill/" name ".JPG")))
 
-(defn list-items [items]
-  (dom/ul {:class "list-group"}
-    (map #(dom/li {:class "list-group-item "}
-            (dom/img  {:src (image (get-in % [:Image :Filename]))})
-            (dom/span {:class "brand"} (get-in % [:Brand :Name]))
-            (dom/span {:class "name"} (get-in % [:Name]))
-            (dom/span {:class "price"} (->> % :Variants first :price)))
-      items)))
+(defn list-items
+  ([items] (list-items items 150 200))
+  ([items w h]
+     (dom/ul {:class "list-group"}
+       (map #(dom/li {:class "list-group-item "}
+               (dom/img  {:src (image (get-in % [:Image :Filename]) w h)})
+               (dom/span {:class "brand"} (get-in % [:Brand :Name]))
+               (dom/span {:class "name"} (get-in % [:Name]))
+               (dom/span {:class "price"} (->> % :Variants first :price)))
+         items))))
 
 (defcomponent available-products [data owner]
   (render [_]
@@ -153,7 +157,7 @@
   (render [_]
     (dom/div {:class "col-xs-3 pull-right cart"}
       (dom/h2 "Cart")
-      (list-items (:cart data)))))
+      (list-items (:cart data) 67 53))))
 
 (defcomponent app [data owner]
   (render [_]
