@@ -27,13 +27,13 @@
    "I'm not sure, let me check."
    "Let me see what we have in stock"
    "Checking, I'll be right back with you."
-   "I think we do, I'll check."])
+   "I think we do. I will check."])
 
 (def second-chance
-  ["I'm sorry, I couldn't understand you, you could repeat that?"
-   "Humm, I'm having trouble understanding you. Could you repeat that?"
+  ["I am sorry, I couldn't understand you. Could repeat that?"
+   "I am having trouble understanding you. Could you repeat that?"
    "Sorry, I didn't catch that, please try again."
-   "I'm sorry, I couldn't understand you, you could you say it in another way?"
+   "I'm sorry, I couldn't understand you. Could you say it in another way?"
    ])
 
 (defn ^:export say [msg]
@@ -44,14 +44,14 @@
 (defn ^:export fill-space []
   (say (rand-nth dead-space-fillers)))
 
-(defn ^:export second-chance []
+(defn ^:export ask-again []
   (say (rand-nth second-chance)))
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Wit.ai
 
 (defn info [msg]
-  (print msg))
+  ( msg))
 
 (defn error [msg]
   (info (str "Error " msg)))
@@ -85,40 +85,97 @@
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Relay Foods
 
-;; (defn ^:export search [q]
-;;   (http/post "https://api.relayfoods.com/api/ecommerce/v1/DCX/search/"
-;;     {:form-params {"Query" (str "query:" q), "Page" 1
-;;                     "PageSize" 20, "RefinementSize" 5
-;;                     "Sort" 2, "Heavy" false}}))
-
-;; One ugly mock
 (defn ^:export search [q]
-  (go (js->clj
-        (.parse js/JSON
-          (:body
-           (<!
-             (http/post "http://localhost:8000/search"
-               {:form-params {"Query" (str "query:" "eggs"), "Page" 1
-                              "PageSize" 20, "RefinementSize" 5
-                              "Sort" 2, "Heavy" false}}))))
-        :keywordize-keys true)))
+  (http/post "https://api.relayfoods.com/api/ecommerce/v1/DCX/search/"
+    {:form-params {"Query" (str "query:" q), "Page" 1
+                    "PageSize" 20, "RefinementSize" 5
+                    "Sort" 2, "Heavy" false}}))
+
+;; ;; One ugly mock
+;; (defn ^:export search [q]
+;;   (go (js->clj
+;;         (.parse js/JSON
+;;           (:body
+;;            (<!
+;;              (http/post "http://localhost:8000/search"
+;;                {:form-params {"Query" (str "query:" "eggs"), "Page" 1
+;;                               "PageSize" 20, "RefinementSize" 5
+;;                               "Sort" 2, "Heavy" false}}))))
+;;         :keywordize-keys true)))
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; state
 
-(defonce state
+;;defonce
+(def state
   (atom {:cart []
-         :available-products []}))
+         :Items []}))
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Main
+
+(defn best-match [q]
+  (go
+    (first (get-in (<! (search q)) [:body :Items]))))
+
+(defn acknowledge-add-to-cart [p]
+  (say
+    (str
+      "Thank you. I have added "
+      (get-in p [:Brand :Name]) "'s"
+      (get-in p [:Name])
+      " to your cart"))
+  (let [h (:Hearts p)]
+    (cond
+      (> h 100) (say
+                  (str
+                    "Wow, great minds think a like. "
+                    "That is one of our most beloved foods,"))
+      (> h 50) (say "That is a good choice"))))
+
+(defn add-to-cart [q]
+  (go
+    (let [prod (<! (best-match q))]
+      (swap! state assoc :cart
+        (conj (@state :cart) prod))
+      (acknowledge-add-to-cart prod))))
+
+(defn interactively-refine-search [q]
+  (go
+    (let [products (get-in (<! (search q)) [:body :Items])]
+      (swap! state assoc :Items products)
+      (say
+        (str
+          "We do have several products like that. "
+          "Could I interest you in "
+          (:Name (first products))
+          " or "
+          (:Name (second products))
+          " or perhaps maybe "
+          (:Name (nth products 2)))))))
+
+(defn interact [response]
+  (let [outcomes (get-in response [:body :outcomes])
+        outcome (first outcomes)
+        confidence (:confidence outcome)
+        intent-of (:intent outcome)
+        entities (:entities outcome)]
+    (fill-space)
+    (if (< confidence 0.27)
+      (ask-again)
+      (case intent-of
+        "add_to_cart" (add-to-cart
+                        (->> entities :product first :value))
+        "search" (interactively-refine-search
+                   (->> entities :product first :value))))))
 
 (defn handle-input [data owner]
   (let [node (om/get-node owner "query")
         query (.-value node)]
     (go (let [response (<! (wit-send query))]
           (prn (:status response))
-          (prn (:body response))))
+          (prn (:body response))
+          (interact response)))
     (set! (.-value node) "")))
 
 (defcomponent input [data owner]
@@ -182,6 +239,5 @@
 (defn main []
   ;; (def mic (new-mic))
   ;; (.connect mic *api-token*)
-  (go (swap! state assoc :Items (:Items (<! (search "eggs")))))
-  (go (swap! state assoc :cart (:Items (<! (search "eggs")))))
+  (say intro)
   (om/root app state {:target (. js/document (getElementById "app"))}))
