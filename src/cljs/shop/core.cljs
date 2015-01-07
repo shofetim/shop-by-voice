@@ -97,18 +97,6 @@
                     "PageSize" 20, "RefinementSize" 5
                     "Sort" 2, "Heavy" false}}))
 
-;; ;; One ugly mock
-;; (defn ^:export search [q]
-;;   (go (js->clj
-;;         (.parse js/JSON
-;;           (:body
-;;            (<!
-;;              (http/post "http://localhost:8000/search"
-;;                {:form-params {"Query" (str "query:" "eggs"), "Page" 1
-;;                               "PageSize" 20, "RefinementSize" 5
-;;                               "Sort" 2, "Heavy" false}}))))
-;;         :keywordize-keys true)))
-
 ;; ──────────────────────────────────────────────────────────────────────
 ;; state
 
