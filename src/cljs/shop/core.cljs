@@ -16,7 +16,9 @@
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Utils
 
-(def *audio* true)
+(def *audio-in* true)
+(def *audio-out* true)
+
 (def *api-token* "X45BKBNG6KKPYUVAWGYQZ3YG2VE3GHZF")
 
 (def intro "Hello, what can I help you find today?")
@@ -37,7 +39,7 @@
    ])
 
 (defn ^:export say [msg]
-  (if *audio*
+  (if *audio-out*
     (.speak js/speechSynthesis (new js/SpeechSynthesisUtterance msg))
     (.log js/console msg)))
 
@@ -51,7 +53,7 @@
 ;; Wit.ai
 
 (defn info [msg]
-  ( msg))
+  (.log js/console msg))
 
 (defn error [msg]
   (info (str "Error " msg)))
@@ -70,8 +72,12 @@
     (set! (.-onerror m) (fn [err] (error err)))
     (set! (.-onconnecting m) (fn [] (info "Microphone is connecting")))
     (set! (.-ondisconnected m) (fn [] (info "Microphone is not connected")))
-    (set! (.-onresult m) (fn [intent, entities] (info intent) (info entities)))
+    (set! (.-onresult m) (fn [intent entities] (info intent) (info entities)))
     m))
+
+(defcomponent microphone [data owner]
+  (render [_]
+    (dom/div {:id "microphone"})))
 
 ;; Cross domain, simple text interaction with Wit.ai, to get this to
 ;; work run chrome with `google-chrome --disable-web-security`
@@ -233,8 +239,10 @@
   (render [_]
     (dom/div {:class "container-fluid"}
       (dom/div {:class "row"}
-        (dom/div {:class "col-xs-offset-3 col-xs-6 focus"}
-          (om/build input data)))
+        (dom/div {:class "col-xs-offset-4 col-xs-5 focus"}
+          (if *audio-in*
+            (om/build microphone data)
+            (om/build input data))))
       (om/build cart data)
       (dom/div {:class "row"}
         (om/build available-products data)))))
@@ -243,7 +251,8 @@
   (.log js/console (clj->js @state)))
 
 (defn main []
-  ;; (def mic (new-mic))
-  ;; (.connect mic *api-token*)
-  (say intro)
-  (om/root app state {:target (. js/document (getElementById "app"))}))
+  (om/root app state {:target (. js/document (getElementById "app"))})
+  (when *audio-in*
+    (def mic (new-mic))
+    (.connect mic *api-token*))
+  (say intro))
