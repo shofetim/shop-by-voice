@@ -14,11 +14,26 @@
 (enable-console-print!)
 
 ;; ──────────────────────────────────────────────────────────────────────
-;; Utils
+;; State
+
+(def state
+  (atom {:cart []
+         :Items []}))
+
+;; ──────────────────────────────────────────────────────────────────────
+;; Relay Foods API
+
+(defn ^:export search [q]
+  (http/post "https://api.relayfoods.com/api/ecommerce/v1/DCX/search/"
+    {:form-params {"Query" (str "query:" q), "Page" 1
+                   "PageSize" 20, "RefinementSize" 5
+                   "Sort" 2, "Heavy" false}}))
+
+;; ──────────────────────────────────────────────────────────────────────
+;; Utils & Settings
 
 (def *audio-in* true)
 (def *audio-out* true)
-
 (def *api-token* "X45BKBNG6KKPYUVAWGYQZ3YG2VE3GHZF")
 
 (def intro "Hello, what can I help you find today?")
@@ -49,64 +64,11 @@
 (defn ^:export ask-again []
   (say (rand-nth second-chance)))
 
-;; ──────────────────────────────────────────────────────────────────────
-;; Wit.ai
-
-(defn info [msg]
-  (.log js/console msg))
-
-(defn error [msg]
-  (info (str "Error " msg)))
-
-(defn kv [k v]
-  (let [v (if (= (.toString v) "[object String]")
-            (.stringify js/JSON v)
-            v)]
-    (str k "=" v "\n")))
-
-(defn new-mic []
-  (let [m (new js/Wit.Microphone (.getElementById js/document "microphone"))]
-    (set! (.-onready m) (fn [] (info "Microphone is ready to record")))
-    (set! (.-onaudiostart m) (fn [] (info "Recording started")))
-    (set! (.-onaudioend m) (fn [] (info "Recording stopped, processing started")))
-    (set! (.-onerror m) (fn [err] (error err)))
-    (set! (.-onconnecting m) (fn [] (info "Microphone is connecting")))
-    (set! (.-ondisconnected m) (fn [] (info "Microphone is not connected")))
-    (set! (.-onresult m) (fn [intent entities] (info intent) (info entities)))
-    m))
-
-(defcomponent microphone [data owner]
-  (render [_]
-    (dom/div {:id "microphone"})))
-
-;; Cross domain, simple text interaction with Wit.ai, to get this to
-;; work run chrome with `google-chrome --disable-web-security`
-(defn wit-send [msg]
-  (http/get "https://api.wit.ai/message"
-    ;;The other token is tied to a domain, this one isn't so keep it
-    ;;out of git's history
-    {:headers {"Authorization" (str "Bearer " *secret*)}
-     :query-params {"v" gensym, "q" msg}}))
+(defn format-price [n]
+  (str "$" (.toFixed (/ (Math.round (* n 100)) 100) 2)))
 
 ;; ──────────────────────────────────────────────────────────────────────
-;; Relay Foods
-
-(defn ^:export search [q]
-  (http/post "https://api.relayfoods.com/api/ecommerce/v1/DCX/search/"
-    {:form-params {"Query" (str "query:" q), "Page" 1
-                    "PageSize" 20, "RefinementSize" 5
-                    "Sort" 2, "Heavy" false}}))
-
-;; ──────────────────────────────────────────────────────────────────────
-;; state
-
-;;defonce
-(def state
-  (atom {:cart []
-         :Items []}))
-
-;; ──────────────────────────────────────────────────────────────────────
-;; Main
+;; Conversation / AI
 
 (defn best-match [q]
   (go
@@ -169,6 +131,38 @@
         "search" (interactively-refine-search
                    (->> entities :local_search_query first :value))))))
 
+;; ──────────────────────────────────────────────────────────────────────
+;; Wit.ai
+
+(defn new-mic []
+  (let [m (new js/Wit.Microphone (.getElementById js/document "microphone"))]
+    (set! (.-onready m) (fn [] (.log js/console "Microphone is ready to record")))
+    (set! (.-onaudiostart m) (fn [] (.log js/console "Recording started")))
+    (set! (.-onaudioend m) (fn [] (.log js/console "Recording stopped, processing started")))
+    (set! (.-onerror m) (fn [err] (.log js/console (str "Error: " err))))
+    (set! (.-onconnecting m) (fn [] (.log js/console "Microphone is connecting")))
+    (set! (.-ondisconnected m) (fn [] (.log js/console "Microphone is not connected")))
+    (set! (.-onresult m) (fn [intent entities]
+                           (.log js/console intent)
+                           (.log js/console entities)))
+    m))
+
+(defcomponent microphone [data owner]
+  (render [_]
+    (dom/div {:id "microphone"})))
+
+;; Cross domain, simple text interaction with Wit.ai, to get this to
+;; work run chrome with `google-chrome --disable-web-security`
+(defn wit-send [msg]
+  (http/get "https://api.wit.ai/message"
+    ;;The other token is tied to a domain, this one isn't so keep it
+    ;;out of git's history
+    {:headers {"Authorization" (str "Bearer " *secret*)}
+     :query-params {"v" gensym, "q" msg}}))
+
+;; ──────────────────────────────────────────────────────────────────────
+;; Main
+
 (defn handle-input [data owner]
   (let [node (om/get-node owner "query")
         query (.-value node)]
@@ -192,10 +186,6 @@
   ([name w h]
      (str "https://res.cloudinary.com/relay-foods/image/upload/"
        "q_40,h_" h ",w_" w ",c_fill/" name ".JPG")))
-
-
-(defn format-price [n]
-  (str "$" (.toFixed (/ (Math.round (* n 100)) 100) 2)))
 
 (defcomponent available-products [data owner]
   (render [_]
