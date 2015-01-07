@@ -8,10 +8,7 @@
             [om-bootstrap.input :as i]
             [om-bootstrap.random :as r]
             [cljs.core.async :refer [close! put! take! chan <! >!]]
-            [cljs-http.client :as http]
-            [shop.secret :refer [*secret*]]))
-
-(enable-console-print!)
+            [cljs-http.client :as http]))
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; State
@@ -21,20 +18,35 @@
          :Items []}))
 
 ;; ──────────────────────────────────────────────────────────────────────
+;; Utils & Settings
+
+;;This is bound to a specific domain
+(def *api-token* "X45BKBNG6KKPYUVAWGYQZ3YG2VE3GHZF")
+
+(defn format-price [n]
+  (str "$" (.toFixed (/ (Math.round (* n 100)) 100) 2)))
+
+(defn log [s]
+  (.log js/console s))
+
+;; ──────────────────────────────────────────────────────────────────────
 ;; Relay Foods API
 
-(defn ^:export search [q]
+(defn search [q]
+  (log (str "Searching for " q))
   (http/post "https://api.relayfoods.com/api/ecommerce/v1/DCX/search/"
-    {:form-params {"Query" (str "query:" q), "Page" 1
+    {:with-credentials? false
+     :form-params {"Query" (str "query:" q), "Page" 1
                    "PageSize" 20, "RefinementSize" 5
                    "Sort" 2, "Heavy" false}}))
 
-;; ──────────────────────────────────────────────────────────────────────
-;; Utils & Settings
+(defn best-match [q]
+  (log (str "Best match search for " q))
+  (go
+    (first (get-in (<! (search q)) [:body :Items]))))
 
-(def *audio-in* true)
-(def *audio-out* true)
-(def *api-token* "X45BKBNG6KKPYUVAWGYQZ3YG2VE3GHZF")
+;; ──────────────────────────────────────────────────────────────────────
+;; Conversation / AI
 
 (def intro "Hello, what can I help you find today?")
 
@@ -53,26 +65,14 @@
    "I'm sorry, I couldn't understand you. Could you say it in another way?"
    ])
 
-(defn ^:export say [msg]
-  (if *audio-out*
-    (.speak js/speechSynthesis (new js/SpeechSynthesisUtterance msg))
-    (.log js/console msg)))
+(defn say [msg]
+  (.speak js/speechSynthesis (new js/SpeechSynthesisUtterance msg)))
 
-(defn ^:export fill-space []
+(defn fill-space []
   (say (rand-nth dead-space-fillers)))
 
-(defn ^:export ask-again []
+(defn ask-again []
   (say (rand-nth second-chance)))
-
-(defn format-price [n]
-  (str "$" (.toFixed (/ (Math.round (* n 100)) 100) 2)))
-
-;; ──────────────────────────────────────────────────────────────────────
-;; Conversation / AI
-
-(defn best-match [q]
-  (go
-    (first (get-in (<! (search q)) [:body :Items]))))
 
 (defn acknowledge-add-to-cart [p]
   (say
@@ -115,71 +115,45 @@
               (:Name (nth products 2)))))
         (say "I'm sorry, I've having trouble searching for that. Please try again")))))
 
-(defn interact [response]
-  (let [outcomes (get-in response [:body :outcomes])
-        outcome (first outcomes)
-        confidence (:confidence outcome)
-        intent-of (:intent outcome)
-        entities (:entities outcome)]
-    (fill-space)
-    (if (< confidence 0.27)
-      (ask-again)
-      ;;fallback to other entity?
-      (case intent-of
-        "add_to_cart" (add-to-cart
-                        (->> entities :product first :value))
-        "search" (interactively-refine-search
-                   (->> entities :local_search_query first :value))))))
+(defn interact [intent entities]
+  (case intent
+    "add_to_cart" (add-to-cart
+                    (->> entities :product :value))
+    "search" (interactively-refine-search
+               (->> entities :local_search_query :value))))
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Wit.ai
 
 (defn new-mic []
   (let [m (new js/Wit.Microphone (.getElementById js/document "microphone"))]
-    (set! (.-onready m) (fn [] (.log js/console "Microphone is ready to record")))
-    (set! (.-onaudiostart m) (fn [] (.log js/console "Recording started")))
-    (set! (.-onaudioend m) (fn [] (.log js/console "Recording stopped, processing started")))
-    (set! (.-onerror m) (fn [err] (.log js/console (str "Error: " err))))
-    (set! (.-onconnecting m) (fn [] (.log js/console "Microphone is connecting")))
-    (set! (.-ondisconnected m) (fn [] (.log js/console "Microphone is not connected")))
+    (set! (.-onready m) (fn [] (log "Microphone is ready to record")))
+    (set! (.-onaudiostart m) (fn [] (log "Recording started")))
+    (set! (.-onaudioend m) (fn []
+                             (log "Recording stopped, processing started")
+                             (fill-space)))
+    (set! (.-onerror m) (fn [err]
+                          (log (str "Error: " err))
+                          (ask-again)))
+    (set! (.-onconnecting m) (fn [] (log "Microphone is connecting")))
+    (set! (.-ondisconnected m) (fn [] (log "Microphone is not connected")))
     (set! (.-onresult m) (fn [intent entities]
-                           (.log js/console intent)
-                           (.log js/console entities)))
+                           (let [entities (js->clj entities
+                                            :keywordize-keys true)]
+                             (log "Result returned")
+                             (log (str "Intent of " intent))
+                             (log (str "Entities " entities))
+                             (interact intent entities))))
     m))
 
-(defcomponent microphone [data owner]
+(defcomponent microphone
+  "DOM required by the Wit.Microphone library"
+  [data owner]
   (render [_]
     (dom/div {:id "microphone"})))
 
-;; Cross domain, simple text interaction with Wit.ai, to get this to
-;; work run chrome with `google-chrome --disable-web-security`
-(defn wit-send [msg]
-  (http/get "https://api.wit.ai/message"
-    ;;The other token is tied to a domain, this one isn't so keep it
-    ;;out of git's history
-    {:headers {"Authorization" (str "Bearer " *secret*)}
-     :query-params {"v" gensym, "q" msg}}))
-
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Main
-
-(defn handle-input [data owner]
-  (let [node (om/get-node owner "query")
-        query (.-value node)]
-    (go (let [response (<! (wit-send query))]
-          (prn (:status response))
-          (prn (:body response))
-          (interact response)))
-    (set! (.-value node) "")))
-
-(defcomponent input [data owner]
-  (render [_]
-    (i/input {:type "text" :ref "query"
-              :auto-focus true
-              :placeholder "Hello, what can I help you find today?"
-              :bs-style "primary"
-              :on-key-down #(when (= (.-key %) "Enter")
-                              (handle-input data owner))})))
 
 (defn image
   ([name] (image name 150 200))
@@ -218,19 +192,13 @@
     (dom/div {:class "container-fluid"}
       (dom/div {:class "row"}
         (dom/div {:class "col-xs-offset-4 col-xs-5 focus"}
-          (if *audio-in*
-            (om/build microphone data)
-            (om/build input data))))
+          (om/build microphone data)))
       (om/build cart data)
       (dom/div {:class "row"}
         (om/build available-products data)))))
 
-(defn ^:export dump []
-  (.log js/console (clj->js @state)))
-
 (defn main []
   (om/root app state {:target (. js/document (getElementById "app"))})
-  (when *audio-in*
-    (def mic (new-mic))
-    (.connect mic *api-token*))
+  (def mic (new-mic))
+  (.connect mic *api-token*)
   (say intro))
