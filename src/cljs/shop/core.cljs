@@ -36,8 +36,8 @@
   (log (str "Searching for " q))
   (http/post "https://api.relayfoods.com/api/ecommerce/v1/DCX/search/"
     {:with-credentials? false
-     :form-params {"Query" (str "query:" q), "Page" 1
-                   "PageSize" 20, "RefinementSize" 5
+     :form-params {"Query" (apply str (interpose " " (map #(str "query:" %) q)))
+                   "Page" 1, "PageSize" 20, "RefinementSize" 5
                    "Sort" 2, "Heavy" false}}))
 
 (defn best-match [q]
@@ -115,12 +115,20 @@
               (:Name (nth products 2)))))
         (say "I'm sorry, I've having trouble searching for that. Please try again")))))
 
+(defn normalize
+  "The structure of the entities can vary widely, first extract the
+  correct entity(ies) by the supplied key, then they may be an object,
+  or a vector of objects, then the values may be a single word, or a
+  phrase. Normalize all into a list of words."
+  [entities key]
+  (flatten
+    (map #(clojure.string.split % #"\s+")
+      (map :value (flatten (conj [] (key entities)))))))
+
 (defn interact [intent entities]
   (case intent
-    "add_to_cart" (add-to-cart
-                    (->> entities :product :value))
-    "search" (interactively-refine-search
-               (->> entities :local_search_query :value))))
+    "add_to_cart" (add-to-cart (normalize entities :product))
+    "search" (interactively-refine-search (normalize entities :local_search_query))))
 
 ;; ──────────────────────────────────────────────────────────────────────
 ;; Wit.ai
